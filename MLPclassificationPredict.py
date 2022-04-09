@@ -1,6 +1,6 @@
 import numpy as np
 
-def MLPclassificationPredict(w, b, X, nHidden, nLabels):
+def MLPclassificationPredict(w, b, X, nHidden, nLabels, loss=False):
     nInstances, nVars = X.shape
     # Form Weights
     inputWeights = w[0:(nVars * nHidden[0])].reshape(nVars, nHidden[0], order='F')
@@ -35,6 +35,10 @@ def MLPclassificationPredict(w, b, X, nHidden, nLabels):
         fp[h] = np.tanh(ip[h])
     y = fp[nHidden.shape[0] - 1].dot(outputWeights) + outputBias
 
-    y = y.argmax(axis=1)
+    prob = np.exp(y)
+    prob = prob / prob.sum(axis=1).reshape(prob.shape[0], 1)
 
-    return y
+    if loss:
+        return prob.argmax(axis=1), prob
+
+    return prob.argmax(axis=1)

@@ -5,9 +5,17 @@ from MLPclassificationPredict import *
 from MLPclassificationLoss import *
 from MLPRegularLoss import *
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 
-def train(learning_rate=1e-3, layer_size=100, regular=1e-3, maxIter=700000, printf=False):
+def train(learning_rate=0.0001, layer_size=300, regular=0.01, maxIter=700000, curve=False):
+    if curve:
+        train_error = []
+        train_loss = []
+        valid_error = []
+        valid_loss = []
+        times = []
+
     np.random.seed(0)
 
     X = np.load('X_train.npy')
@@ -70,12 +78,34 @@ def train(learning_rate=1e-3, layer_size=100, regular=1e-3, maxIter=700000, prin
 
     for iter in range(maxIter):
         if iter % 5000 == 0:
-            # test_w, test_b = fine_tuning(w.copy(), b.copy(), X, y, nHidden, nLabels)
-            yhat = MLPclassificationPredict(w, b, Xvalid, nHidden, nLabels)
-            yhat = yhat.reshape(yhat.shape[0], 1)
-            error = float(sum(yhat != yvalid) / t)
-            print('Training iteration = {iter}, validation error = {error}'.format(
-                iter=iter, error=error))
+            if curve:
+                yhat, prob = MLPclassificationPredict(w, b, Xvalid, nHidden, nLabels, loss=True)
+                yhat = yhat.reshape(yhat.shape[0], 1)
+                error = float(sum(yhat != yvalid) / t)
+                print('Training iteration = {iter}, validation error = {error}'.format(
+                    iter=iter, error=error))
+                valid_error.append(error)
+                loss = 0
+                for i in range(t):
+                    loss += - np.log(prob[i][yvalid[i]])
+                valid_loss.append(loss / t)
+
+                yhat, prob = MLPclassificationPredict(w, b, X, nHidden, nLabels, loss=True)
+                yhat = yhat.reshape(yhat.shape[0], 1)
+                train_error.append(float(sum(yhat != y) / n))
+                loss = 0
+                for i in range(n):
+                    loss += - np.log(prob[i][y[i]])
+                train_loss.append(loss / n)
+
+                times.append(iter)
+
+            else:
+                yhat = MLPclassificationPredict(w, b, Xvalid, nHidden, nLabels)
+                yhat = yhat.reshape(yhat.shape[0], 1)
+                error = float(sum(yhat != yvalid) / t)
+                print('Training iteration = {iter}, validation error = {error}'.format(
+                    iter=iter, error=error))
 
             if error < min_error:
                 min_error = error
@@ -101,30 +131,64 @@ def train(learning_rate=1e-3, layer_size=100, regular=1e-3, maxIter=700000, prin
         Gb = beta2 * Gb + (1 - beta2) * gb * gb
         b = b - stepSize / np.sqrt(Gb / (1 - beta2 ** iter) + eps) * Mb / (1 - beta1 ** iter)
 
-    if printf:
-        yhat = MLPclassificationPredict(best_w, best_b, X, nHidden, nLabels)
-        yhat = yhat.reshape(yhat.shape[0], 1)
-        print('Train error with final model = {error}'.format(
-            error=float(sum(yhat != y) / n)))
+    yhat = MLPclassificationPredict(best_w, best_b, X, nHidden, nLabels)
+    yhat = yhat.reshape(yhat.shape[0], 1)
+    print('Train error with final model = {error}'.format(
+        error=float(sum(yhat != y) / n)))
 
     yhat = MLPclassificationPredict(best_w, best_b, Xvalid, nHidden, nLabels)
     yhat = yhat.reshape(yhat.shape[0], 1)
-    valid_error = float(sum(yhat != yvalid) / t)
-    if printf:
-        print('Validation error with final model = {error}'.format(error=error))
+    va_error = float(sum(yhat != yvalid) / t)
+    print('Validation error with final model = {error}'.format(error=error))
 
-    if printf:
-        # Evaluate test error
-        yhat = MLPclassificationPredict(best_w, best_b, Xtest, nHidden, nLabels)
-        yhat = yhat.reshape(yhat.shape[0], 1)
-        print('Test error with final model = {error}\n'.format(
-            error=float(sum(yhat != ytest) / t2)))
+    # Evaluate test error
+    yhat = MLPclassificationPredict(best_w, best_b, Xtest, nHidden, nLabels)
+    yhat = yhat.reshape(yhat.shape[0], 1)
+    print('Test error with final model = {error}\n'.format(
+        error=float(sum(yhat != ytest) / t2)))
 
     # scio.savemat('para.mat', mdict={'w': best_w, 'b': best_b, 'nHidden': nHidden,
     #                                 'nLabels': nLabels, 'mu': mu, 'sigma': sigma})
 
-    return best_w, best_b, valid_error, nHidden, nLabels, mu, sigma
+    if curve:
+        return train_error, train_loss, valid_error, valid_loss, times
+
+    return best_w, best_b, va_error, nHidden, nLabels, mu, sigma
 
 
 if __name__ == '__main__':
-    train(printf=True)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--lr', type=float, default=0.0001,
+                        help='learning rate')
+    parser.add_argument('--iter', type=int, default=700000,
+                        help='iteration times')
+    parser.add_argument('--layer', type=int, default=300,
+                        help='size for the hidden layer')
+    parser.add_argument('--regular', type=float, default=0.01,
+                        help='coefficient of L2 regularization')
+
+    args = parser.parse_args()
+
+    train_error, train_loss, valid_error, valid_loss, times = train(args.lr, args.layer, args.regular, args.iter, True)
+
+    # scio.savemat('curve.mat', mdict={'train_error': train_error, 'train_loss': train_loss,
+    #                                 'valid_error': valid_error, 'valid_loss': valid_loss,
+    #                                 'times': times})
+
+
+    plt.plot(times, np.log(train_error), label='Error on the training set')
+    plt.plot(times, np.log(valid_error), label='Error on the validation set')
+    plt.xlabel('Iteration')
+    plt.ylabel('log Error')
+    plt.legend()
+    plt.savefig('Error.jpg')
+
+    plt.figure()
+    plt.plot(times, np.log(train_loss), label='Loss on the training set')
+    plt.plot(times, np.log(valid_loss), label='Loss on the validation set')
+    plt.xlabel('Iteration')
+    plt.ylabel('log Loss')
+    plt.legend()
+    plt.savefig('Loss.jpg')
