@@ -1,9 +1,9 @@
 import scipy.io as scio
 import numpy as np
-from standardizeCols import *
-from MLPclassificationPredict import *
-from MLPclassificationLoss import *
-from MLPRegularLoss import *
+from model.standardizeCols import *
+from model.MLPclassificationPredict import *
+from model.MLPclassificationLoss import *
+from model.MLPRegularLoss import *
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
@@ -18,11 +18,11 @@ def train(learning_rate=0.0001, layer_size=300, regular=0.01, maxIter=700000, cu
 
     np.random.seed(0)
 
-    X = np.load('X_train.npy')
-    y = np.load('y_train.npy')
+    X = np.load('./data/X_train.npy')
+    y = np.load('./data/y_train.npy')
 
-    Xtest = np.load('X_test.npy')
-    ytest = np.load('y_test.npy')
+    Xtest = np.load('./data/X_test.npy')
+    ytest = np.load('./data/y_test.npy')
 
     X, Xvalid, y, yvalid = train_test_split(X, y, test_size=0.1, random_state=0)
 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     plt.xlabel('Iteration')
     plt.ylabel('log Error')
     plt.legend()
-    plt.savefig('Error.jpg')
+    plt.savefig('error.jpg')
 
     plt.figure()
     plt.plot(times, np.log(train_loss), label='Loss on the training set')
@@ -191,4 +191,4 @@ if __name__ == '__main__':
     plt.xlabel('Iteration')
     plt.ylabel('log Loss')
     plt.legend()
-    plt.savefig('Loss.jpg')
+    plt.savefig('loss.jpg')

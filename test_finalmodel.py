@@ -1,11 +1,11 @@
 import numpy as np
 import scipy.io as scio
-from MLPclassificationPredict import *
-from standardizeCols import *
+from model.MLPclassificationPredict import *
+from model.standardizeCols import *
 
 if __name__ == '__main__':
 
-    para = scio.loadmat('para.mat')
+    para = scio.loadmat('./checkpoints/para.mat')
     w = para['w']
     b = para['b']
     mu = para['mu']

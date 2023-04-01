@@ -4,11 +4,11 @@
 
 ### 函数文件说明
 
-- `standardizeCols.py` : 对数据的标准化操作
+- `model/standardizeCols.py` : 对数据的标准化操作
 - `neuralNetwork.py` : 对传入参数训练神经网络
-- `MLPRegularLoss.py` : 返回正则化相关的梯度
-- `MLPclassificationLoss.py` : 返回损失函数相关的梯度
-- `MLPclassificationPredict.py` : 使用模型对测试数据进行预测
+- `model/MLPRegularLoss.py` : 返回正则化相关的梯度
+- `model/MLPclassificationLoss.py` : 返回损失函数相关的梯度
+- `model/MLPclassificationPredict.py` : 使用模型对测试数据进行预测
 - `find_best_coefficient.py` : 枚举训练参数找到对验证集最好的模型，并保存参数及模型
 - `test_finalmodel.py` : 对最终模型在测试集上预测，输出误差
 
