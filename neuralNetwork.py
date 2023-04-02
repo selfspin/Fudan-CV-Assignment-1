@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 
 
-def train(learning_rate=0.0001, layer_size=300, regular=0.01, maxIter=700000, curve=False):
+def train(learning_rate=0.0001, layer_size=300, regular=0.01, maxIter=700000, curve=False, save_model=False):
     if curve:
         train_error = []
         train_loss = []
@@ -147,7 +147,7 @@ def train(learning_rate=0.0001, layer_size=300, regular=0.01, maxIter=700000, cu
     print('Test error with final model = {error}\n'.format(
         error=float(sum(yhat != ytest) / t2)))
 
-    if args.save_model:
+    if save_model:
         scio.savemat('para.mat', mdict={'w': best_w, 'b': best_b, 'nHidden': nHidden,
                                         'nLabels': nLabels, 'mu': mu, 'sigma': sigma})
 
@@ -174,7 +174,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    train_error, train_loss, valid_error, valid_loss, times = train(args.lr, args.layer, args.regular, args.iter, True)
+    train_error, train_loss, valid_error, valid_loss, times = train(args.lr, args.layer, args.regular, args.iter, True,
+                                                                    args.save_model)
 
     # scio.savemat('curve.mat', mdict={'train_error': train_error, 'train_loss': train_loss,
     #                                 'valid_error': valid_error, 'valid_loss': valid_loss,
@@ -185,7 +186,7 @@ if __name__ == '__main__':
     plt.xlabel('Iteration')
     plt.ylabel('log Error')
     plt.legend()
-    plt.savefig('error.jpg')
+    plt.savefig('./results/error.jpg')
 
     plt.figure()
     plt.plot(times, np.log(train_loss), label='Loss on the training set')
@@ -193,4 +194,4 @@ if __name__ == '__main__':
     plt.xlabel('Iteration')
     plt.ylabel('log Loss')
     plt.legend()
-    plt.savefig('loss.jpg')
+    plt.savefig('./results/loss.jpg')

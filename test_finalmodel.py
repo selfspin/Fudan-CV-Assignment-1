@@ -13,8 +13,8 @@ if __name__ == '__main__':
     nHidden = para['nHidden'].reshape([1])
     nLabels = int(para['nLabels'])
 
-    Xtest = np.load('X_test.npy')
-    ytest = np.load('y_test.npy')
+    Xtest = np.load('./data/X_test.npy')
+    ytest = np.load('./data/y_test.npy')
     Xtest, _, _ = standardizeCols(Xtest, mu, sigma)
     n = Xtest.shape[0]
 

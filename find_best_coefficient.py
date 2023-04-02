@@ -23,9 +23,9 @@ if __name__ == '__main__':
                                                                        regular, args.iter)
                 if valid_error < min_error:
                     min_error = valid_error
-                    scio.savemat('para.mat', mdict={'w': w, 'b': b, 'nHidden': nHidden,
+                    scio.savemat('./checkpoints/para.mat', mdict={'w': w, 'b': b, 'nHidden': nHidden,
                                                     'nLabels': nLabels, 'mu': mu, 'sigma': sigma})
-                    scio.savemat('train_para.mat', mdict={'lr': learning_rate, 'layer': layer_size,
+                    scio.savemat('./checkpoints/train_para.mat', mdict={'lr': learning_rate, 'layer': layer_size,
                                                           'regular': regular})
 
     print('\nProcess is complete')
