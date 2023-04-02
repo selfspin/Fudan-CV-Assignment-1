@@ -147,8 +147,9 @@ def train(learning_rate=0.0001, layer_size=300, regular=0.01, maxIter=700000, cu
     print('Test error with final model = {error}\n'.format(
         error=float(sum(yhat != ytest) / t2)))
 
-    # scio.savemat('para.mat', mdict={'w': best_w, 'b': best_b, 'nHidden': nHidden,
-    #                                 'nLabels': nLabels, 'mu': mu, 'sigma': sigma})
+    if args.save_model:
+        scio.savemat('para.mat', mdict={'w': best_w, 'b': best_b, 'nHidden': nHidden,
+                                        'nLabels': nLabels, 'mu': mu, 'sigma': sigma})
 
     if curve:
         return train_error, train_loss, valid_error, valid_loss, times
@@ -168,6 +169,8 @@ if __name__ == '__main__':
                         help='size for the hidden layer')
     parser.add_argument('--regular', type=float, default=0.01,
                         help='coefficient of L2 regularization')
+    parser.add_argument('--save-model', action='store_true', default=False,
+                        help='use if need to save the model checkpoint')
 
     args = parser.parse_args()
 
@@ -176,7 +179,6 @@ if __name__ == '__main__':
     # scio.savemat('curve.mat', mdict={'train_error': train_error, 'train_loss': train_loss,
     #                                 'valid_error': valid_error, 'valid_loss': valid_loss,
     #                                 'times': times})
-
 
     plt.plot(times, np.log(train_error), label='Error on the training set')
     plt.plot(times, np.log(valid_error), label='Error on the validation set')
